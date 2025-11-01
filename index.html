@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>OTTO ESSENTIALS </title>
+  <title>OTTO ESSENTIALS</title>
   <style>
     body {
       font-family: "Segoe UI", Arial, sans-serif;
@@ -12,22 +12,23 @@
 
     h2, h3 {
       color: #333;
+      text-align: left;
     }
 
     form {
       background: #fff;
       padding: 25px 30px;
       border-radius: 10px;
-      max-width: 700px;
+      max-width: 800px;
       margin: auto;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     }
 
     label {
       display: block;
-      font-weight: 600;
+      font-weight: bold;
       margin-top: 12px;
-      color: #444;
+      color: #000;
     }
 
     input, select {
@@ -46,12 +47,30 @@
       box-shadow: 0 0 3px rgba(0, 123, 255, 0.3);
     }
 
-    .order-item {
+    .order-item, .payment-item {
       border: 1px solid #ddd;
       background: #fafafa;
       padding: 15px;
       margin-bottom: 10px;
       border-radius: 8px;
+      position: relative;
+    }
+
+    .delete-btn {
+      position: absolute;
+      right: 10px;
+      top: 10px;
+      background-color: #dc3545;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      padding: 5px 10px;
+      cursor: pointer;
+      font-size: 13px;
+    }
+
+    .delete-btn:hover {
+      opacity: 0.9;
     }
 
     button {
@@ -75,10 +94,6 @@
       width: 100%;
     }
 
-    button:hover {
-      opacity: 0.9;
-    }
-
     hr {
       margin: 25px 0;
       border: none;
@@ -89,13 +104,20 @@
     .hidden {
       display: none;
     }
+
+    #totalAmount {
+      font-weight: bold;
+      color: #007bff;
+      margin-top: 10px;
+      display: block;
+    }
   </style>
 </head>
 <body>
 
-  <h2 style="text-align:center;">Raise Credit Approval Request</h2>
+  <h2>Raise Credit Approval Request</h2>
 
-  <form action="https://wowflo.io/webhook/194c8d82-eb8d-4599-b6a2-c0343a55d566" method="POST" enctype="multipart/form-data">
+  <form action="https://wowflo.io/webhook-test/194c8d82-eb8d-4599-b6a2-c0343a55d566" method="POST" enctype="multipart/form-data">
 
     <label>Customer Name:</label>
     <input type="text" name="customer_name" required>
@@ -111,8 +133,8 @@
       <div class="order-item">
         <label>Category:</label>
         <select name="category[]">
-          <option value="Vest">Vest</option>
-          <option value="Brief">Brief</option>
+          <option value="Vest/Brief">Vest & Brief</option>
+          <!-- <option value="Brief">Brief</option> -->
           <option value="Trunk">Trunk</option>
           <option value="Shorts">Shorts</option>
           <option value="Track">Track</option>
@@ -124,6 +146,8 @@
 
         <label>Amount:</label>
         <input type="number" name="amount[]" step="0.01" required>
+
+        <button type="button" class="delete-btn" onclick="deleteItem(this)">X</button>
       </div>
     </div>
 
@@ -156,29 +180,46 @@
     </div>
 
     <h3>Payment Summary</h3>
-
+<div id="payment-items">
+  <div class="payment-item">
     <label>Payment Follow-up Date:</label>
-    <input type="datetime-local" name="payment_followup_date" required>
+    <input type="datetime-local" name="payment_followup_date[]" required>
 
-    <label>Amount:</label>
-    <input type="number" name="payment_amount" step="0.01">
+    <label>Pending Amount:</label>
+    <input type="number" name="payment_amount[]" step="0.01" oninput="updateTotal()">
 
-    <label>Days of Pending Amount:</label>
-    <input type="number" name="pending_days">
+    <label>Pending Days:</label>
+    <select name="pending_days[]">
+      <option>Above 90 Days</option>
+      <option>Above 120 Days</option>
+    </select>
 
     <label>Cheque No:</label>
-    <input type="text" name="cheque_no">
+    <input type="text" name="cheque_no[]">
 
     <label>Payment Mode:</label>
-    <select name="payment_mode">
+    <select name="payment_mode[]">
       <option>Cheque</option>
       <option>Cash</option>
       <option>Bank Transfer</option>
       <option>UPI</option>
     </select>
 
-    <label>Attachments (PDF/JPG):</label>
-    <input type="file" name="attachment" accept=".pdf, .jpg, .jpeg" multiple>
+    <label>Attachment (Cheque/Proof):</label>
+    <input type="file" name="payment_attachment[]" multiple accept=".pdf, .jpg, .jpeg, .png">
+
+    <button type="button" class="delete-btn" onclick="deleteItem(this)">X</button>
+  </div>
+</div>
+
+<button type="button" onclick="addPaymentItem()">+ Add More Cheques</button>
+
+<span id="totalAmount">Total Pending Amount: ₹0</span>
+
+    <hr>
+
+    <!-- <label>Overall Attachments (Optional):</label> -->
+    <!-- <input type="file" name="attachment[]" accept=".pdf, .jpg, .jpeg" multiple> -->
 
     <label>From Mail ID:</label>
     <input type="email" name="from_mail" placeholder="Enter Your Mail ID">
@@ -198,8 +239,8 @@
       item.innerHTML = `
         <label>Category:</label>
         <select name="category[]">
-          <option value="Vest">Vest</option>
-          <option value="Brief">Brief</option>
+          <option value="Vest/Brief">Vest & Brief</option>
+          
           <option value="Trunk">Trunk</option>
           <option value="Shorts">Shorts</option>
           <option value="Track">Track</option>
@@ -211,18 +252,84 @@
 
         <label>Amount:</label>
         <input type="number" name="amount[]" step="0.01" required>
+
+        <button type="button" class="delete-btn" onclick="deleteItem(this)">X</button>
       `;
       container.appendChild(item);
     }
 
+   
+function addPaymentItem() {
+  const container = document.getElementById('payment-items');
+  const item = document.createElement('div');
+  item.classList.add('payment-item');
+  item.innerHTML = `
+    <label>Payment Follow-up Date:</label>
+    <input type="datetime-local" name="payment_followup_date[]" required>
+
+    <label>Pending Amount:</label>
+    <input type="number" name="payment_amount[]" step="0.01" oninput="updateTotal()">
+
+    <label>Pending Days:</label>
+    <select name="pending_days[]">
+      <option>Above 90 Days</option>
+      <option>Above 120 Days</option>
+    </select>
+
+    <label>Cheque No:</label>
+    <input type="text" name="cheque_no[]">
+
+    <label>Payment Mode:</label>
+    <select name="payment_mode[]">
+      <option>Cheque</option>
+      <option>Cash</option>
+      <option>Bank Transfer</option>
+      <option>UPI</option>
+    </select>
+
+    <label>Attachment (Cheque/Proof):</label>
+    <input type="file" name="payment_attachment[]" accept=".pdf, .jpg, .jpeg, .png">
+
+    <button type="button" class="delete-btn" onclick="deleteItem(this)">X</button>
+  `;
+  container.appendChild(item);
+}
+
+
+    function deleteItem(button) {
+      button.parentElement.remove();
+      updateTotal();
+    }
+
+    function updateTotal() {
+      const amounts = document.querySelectorAll('input[name="payment_amount[]"]');
+      let total = 0;
+      amounts.forEach(a => {
+        const val = parseFloat(a.value);
+        if (!isNaN(val)) total += val;
+      });
+      document.getElementById('totalAmount').textContent = `Total Pending Amount: ₹${total.toFixed(2)}`;
+    }
+
+    const newItems = [];
+
+// for (const item of items) {
+//   const binaries = item.binary;
+//   for (const key in binaries) {
+//     newItems.push({
+//       json: { fileKey: key },
+//       binary: { data: binaries[key] }
+//     });
+//   }
+// }
+
+// return newItems;
+
+
     function checkState() {
       const state = document.getElementById('stateSelect').value;
       const agmDiv = document.getElementById('agmMailDiv');
-      if (state && state !== 'Tamil Nadu') {
-        agmDiv.classList.remove('hidden');
-      } else {
-        agmDiv.classList.add('hidden');
-      }
+      agmDiv.classList.toggle('hidden', state === 'Tamil Nadu' || !state);
     }
   </script>
 
