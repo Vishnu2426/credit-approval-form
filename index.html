@@ -125,16 +125,19 @@
     <label>Order Date:</label>
     <input type="date" name="order_date" required>
 
-    <label>Order ID:</label>
-    <input type="text" name="order_id" required>
+    <!-- <label>Order ID:</label>
+    <input type="text" name="main_order_id" required> -->
 
     <h3>Order Details</h3>
     <div id="order-items">
       <div class="order-item">
+        <!-- ✅ Added Order ID inside each order item -->
+        <label>Order ID:</label>
+        <input type="text" name="order_id[]" placeholder="Enter Order ID" required>
+
         <label>Category:</label>
         <select name="category[]">
           <option value="Vest/Brief">Vest & Brief</option>
-          <!-- <option value="Brief">Brief</option> -->
           <option value="Trunk">Trunk</option>
           <option value="Shorts">Shorts</option>
           <option value="Track">Track</option>
@@ -193,10 +196,7 @@
       <option>Above 90 Days</option>
       <option>Above 120 Days</option>
     </select>
-
-    <label>Cheque No:</label>
-    <input type="text" name="cheque_no[]">
-
+   
     <label>Payment Mode:</label>
     <select name="payment_mode[]">
       <option>Cheque</option>
@@ -204,6 +204,9 @@
       <option>Bank Transfer</option>
       <option>UPI</option>
     </select>
+
+    <label>Cheque No:</label>
+    <input type="text" name="cheque_no[]">
 
     <label>Attachment (Cheque/Proof):</label>
     <input type="file" name="payment_attachment[]" multiple accept=".pdf, .jpg, .jpeg, .png">
@@ -217,9 +220,6 @@
 <span id="totalAmount">Total Pending Amount: ₹0</span>
 
     <hr>
-
-    <!-- <label>Overall Attachments (Optional):</label> -->
-    <!-- <input type="file" name="attachment[]" accept=".pdf, .jpg, .jpeg" multiple> -->
 
     <label>From Mail ID:</label>
     <input type="email" name="from_mail" placeholder="Enter Your Mail ID">
@@ -237,10 +237,12 @@
       const item = document.createElement('div');
       item.classList.add('order-item');
       item.innerHTML = `
+        <label>Order ID:</label>
+        <input type="text" name="order_id[]" placeholder="Enter Order ID" required>
+
         <label>Category:</label>
         <select name="category[]">
           <option value="Vest/Brief">Vest & Brief</option>
-          
           <option value="Trunk">Trunk</option>
           <option value="Shorts">Shorts</option>
           <option value="Track">Track</option>
@@ -258,43 +260,41 @@
       container.appendChild(item);
     }
 
-   
-function addPaymentItem() {
-  const container = document.getElementById('payment-items');
-  const item = document.createElement('div');
-  item.classList.add('payment-item');
-  item.innerHTML = `
-    <label>Payment Follow-up Date:</label>
-    <input type="datetime-local" name="payment_followup_date[]" required>
+    function addPaymentItem() {
+      const container = document.getElementById('payment-items');
+      const item = document.createElement('div');
+      item.classList.add('payment-item');
+      item.innerHTML = `
+        <label>Payment Follow-up Date:</label>
+        <input type="datetime-local" name="payment_followup_date[]" required>
 
-    <label>Pending Amount:</label>
-    <input type="number" name="payment_amount[]" step="0.01" oninput="updateTotal()">
+        <label>Pending Amount:</label>
+        <input type="number" name="payment_amount[]" step="0.01" oninput="updateTotal()">
 
-    <label>Pending Days:</label>
-    <select name="pending_days[]">
-      <option>Above 90 Days</option>
-      <option>Above 120 Days</option>
-    </select>
+        <label>Pending Days:</label>
+        <select name="pending_days[]">
+          <option>Above 90 Days</option>
+          <option>Above 120 Days</option>
+        </select>
 
-    <label>Cheque No:</label>
-    <input type="text" name="cheque_no[]">
+        <label>Payment Mode:</label>
+        <select name="payment_mode[]">
+          <option>Cheque</option>
+          <option>Cash</option>
+          <option>Bank Transfer</option>
+          <option>UPI</option>
+        </select>
 
-    <label>Payment Mode:</label>
-    <select name="payment_mode[]">
-      <option>Cheque</option>
-      <option>Cash</option>
-      <option>Bank Transfer</option>
-      <option>UPI</option>
-    </select>
+        <label>Cheque No:</label>
+        <input type="text" name="cheque_no[]">
 
-    <label>Attachment (Cheque/Proof):</label>
-    <input type="file" name="payment_attachment[]" accept=".pdf, .jpg, .jpeg, .png">
+        <label>Attachment (Cheque/Proof):</label>
+        <input type="file" name="payment_attachment[]" multiple accept=".pdf, .jpg, .jpeg, .png">
 
-    <button type="button" class="delete-btn" onclick="deleteItem(this)">X</button>
-  `;
-  container.appendChild(item);
-}
-
+        <button type="button" class="delete-btn" onclick="deleteItem(this)">X</button>
+      `;
+      container.appendChild(item);
+    }
 
     function deleteItem(button) {
       button.parentElement.remove();
@@ -310,21 +310,6 @@ function addPaymentItem() {
       });
       document.getElementById('totalAmount').textContent = `Total Pending Amount: ₹${total.toFixed(2)}`;
     }
-
-    const newItems = [];
-
-// for (const item of items) {
-//   const binaries = item.binary;
-//   for (const key in binaries) {
-//     newItems.push({
-//       json: { fileKey: key },
-//       binary: { data: binaries[key] }
-//     });
-//   }
-// }
-
-// return newItems;
-
 
     function checkState() {
       const state = document.getElementById('stateSelect').value;
